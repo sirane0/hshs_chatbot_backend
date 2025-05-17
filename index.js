@@ -35,8 +35,6 @@ app.get('/users', (req, res) => {
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-const cors = require('cors');
-
 app.use(cors({
   origin: 'https://your-frontend-domain.com', // 프론트엔드 도메인으로 변경
   credentials: true
