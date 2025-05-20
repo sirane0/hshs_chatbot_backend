@@ -9,10 +9,7 @@ let users = []; // 서버 메모리에 임시 저장 (재시작 시 초기화됨
 
 // CORS 설정
 app.use(cors({
-  origin: [
-    'https://hshschatbot0.github.io', // 기존 도메인
-    'https://sirane0.github.io'       // ★ 이걸 추가해야 함
-  ],
+  origin: "https://sirane0.github.io", // 정확히 GitHub Pages 주소 입력
   credentials: true
 }));
 
