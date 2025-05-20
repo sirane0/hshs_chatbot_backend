@@ -10,6 +10,11 @@ let users = []; // 메모리 저장
 app.use(cors());
 app.use(bodyParser.json());
 
+app.use(cors({
+  origin: "https://hshschatbot0.github.io", // 프론트엔드 도메인
+  credentials: true
+}));
+
 app.post('/register', (req, res) => {
   const { id, password, name, role } = req.body;
   const exists = users.find(u => u.id === id);
