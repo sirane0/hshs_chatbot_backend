@@ -13,6 +13,19 @@ app.use(cors({
   credentials: true
 }));
 
+const allowedOrigins = ["https://sirane0.github.io", "http://localhost:3000"];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
+
 // JSON 파싱 미들웨어
 app.use(bodyParser.json());
 
