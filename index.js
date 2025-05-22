@@ -29,6 +29,7 @@ app.post('/register', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
+  console.log('로그인 요청 받음:', req.body);
   const { id, password } = req.body;
   if (!id || !password) {
     return res.status(400).json({ message: '아이디와 비밀번호를 입력해주세요.' });
