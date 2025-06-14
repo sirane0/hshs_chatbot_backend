@@ -5,88 +5,85 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 서버 메모리에 사용자 정보를 저장하는 배열
-// 실제 서비스에서는 DB를 사용해야 하지만, 여기서는 간단한 예제로 메모리 사용
-let users = []; 
+// 서버 메모리상에 사용자 목록 저장 (실제 서비스용 DB 아님, 서버 재시작 시 초기화됨)
+let users = [];
 
-// CORS 설정: 오직 https://sirane0.github.io 도메인에서만 API 요청을 허용
-// credentials: true 설정으로 쿠키, 인증 헤더 등의 자격 증명 포함 요청 가능하게 함
+// ✅ CORS 설정: 프론트엔드가 배포된 도메인만 허용
 app.use(cors({
-  origin: "https://sirane0.github.io",
-  credentials: true
+  origin: "https://sirane0.github.io",  // 실제 프론트엔드 URL로 변경하세요
+  credentials: true                     // 쿠키 및 인증정보 허용
 }));
 
-// 요청 본문이 JSON 형태임을 인식하고 파싱해주는 미들웨어
+// ✅ 클라이언트가 JSON 형태로 보낸 요청 바디를 파싱하기 위한 미들웨어
 app.use(bodyParser.json());
 
-/**
- * 회원가입 API
- * - POST /register
- * - 클라이언트가 JSON 형식으로 id, password, name, role, year, studentId를 보냄
- * - 필수 항목(id, password, name, role) 누락 시 400 에러 반환
- * - 이미 동일한 id가 존재하면 400 에러 반환
- * - 신규 사용자 정보를 배열에 저장 후 201 상태코드와 함께 성공 메시지 및 사용자 정보 반환
- */
+// ===========================
+// ✅ 회원가입 API
+// 1) 클라이언트가 보내온 JSON 바디가 잘 도착하는지 로그 출력
+// 2) 필수 항목(id, password, name, role) 검증
+// 3) 중복 아이디 확인
+// 4) 새 사용자 객체 생성 및 메모리 배열에 저장
+// 5) 저장된 배열 상태를 서버 콘솔에 출력(디버깅 목적)
+// 6) 성공 응답 전송
+// ===========================
 app.post('/register', (req, res) => {
+  console.log('회원가입 요청 바디:', req.body);
+
   const { id, password, name, role, year, studentId } = req.body;
 
-  // 필수 항목 체크
+  // 필수 값 누락 시 400 에러 반환
   if (!id || !password || !name || !role) {
     return res.status(400).json({ message: '필수 항목이 누락되었습니다.' });
   }
 
-  // 기존 사용자 중복 검사
+  // 중복 아이디 확인: 이미 존재하면 400 에러 반환
   const exists = users.find(u => u.id === id);
   if (exists) {
     return res.status(400).json({ message: '이미 존재하는 아이디입니다.' });
   }
 
-  // 사용자 객체 생성 및 저장
+  // 새 사용자 객체 생성 및 배열에 추가
   const newUser = { id, password, name, role, year, studentId };
   users.push(newUser);
 
-  // 성공 응답 반환
+  // 현재 배열 상태 출력 (디버깅용)
+  console.log('현재 저장된 사용자 목록:', users);
+
+  // 회원가입 성공 응답(201 Created)
   res.status(201).json({ message: '회원가입 성공', user: newUser });
 });
 
-/**
- * 로그인 API
- * - POST /login
- * - 클라이언트가 JSON 형식으로 id와 password를 보냄
- * - id, password 누락 시 400 에러 반환
- * - users 배열에서 id, password가 일치하는 사용자 탐색
- * - 일치하는 사용자가 없으면 401 인증 실패 응답 반환
- * - 성공 시 로그인 성공 메시지와 사용자 정보 반환
- */
+// ===========================
+// ✅ 로그인 API
+// 1) id, password 입력 확인
+// 2) users 배열에서 아이디와 비밀번호 일치하는 사용자 찾기
+// 3) 없으면 401 에러, 있으면 사용자 정보 응답
+// ===========================
 app.post('/login', (req, res) => {
   const { id, password } = req.body;
 
-  // 필수 입력 체크
   if (!id || !password) {
     return res.status(400).json({ message: '아이디와 비밀번호를 입력해주세요.' });
   }
 
-  // 사용자 인증
+  // 단순 평문 비교(보안상 취약) — 실제 서비스시 해시 사용 권장
   const user = users.find(u => u.id === id && u.password === password);
+
   if (!user) {
     return res.status(401).json({ message: '아이디 또는 비밀번호 오류' });
   }
 
-  // 로그인 성공 응답
   res.json({ message: '로그인 성공', user });
 });
 
-/**
- * 사용자 전체 목록 반환 API
- * - GET /users
- * - 회원가입 중복체크 등 클라이언트에서 사용자 목록이 필요할 때 호출
- * - users 배열 전체를 JSON으로 반환
- */
+// ===========================
+// ✅ 사용자 전체 목록 반환 (중복 체크 등에 활용)
+// ===========================
 app.get('/users', (req, res) => {
   res.json(users);
 });
 
-// 서버 시작 및 지정 포트에서 리스닝
+// 서버 실행
 app.listen(PORT, () => {
   console.log(`✅ 서버 실행 중: http://localhost:${PORT}`);
 });
