@@ -1,0 +1,17 @@
+[
+  {
+    "username": "lucy0527",
+    "password": "admin123",
+    "role": "관리자"
+  },
+  {
+    "username": "teacher01",
+    "password": "teachpass",
+    "role": "선생님"
+  },
+  {
+    "username": "student01",
+    "password": "studypass",
+    "role": "학생"
+  }
+]
